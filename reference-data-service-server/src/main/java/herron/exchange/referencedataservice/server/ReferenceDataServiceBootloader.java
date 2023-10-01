@@ -24,14 +24,26 @@ public class ReferenceDataServiceBootloader extends KafkaBroadCastProducer {
     }
 
     public void init() {
-        HerronDataLoading start = new HerronDataLoading(Instant.now().toEpochMilli(), DataLoadingStateEnum.START);
-        broadcastMessage(start);
-        repository.getMarkets().forEach(this::broadcastMessage);
-        repository.getInstruments().forEach(this::broadcastMessage);
-        repository.getOrderbookData().forEach(this::broadcastMessage);
-        HerronDataLoading done = new HerronDataLoading(Instant.now().toEpochMilli(), DataLoadingStateEnum.DONE);
-        broadcastMessage(done);
+
+        initReferenceDataBroadCasting();
     }
 
 
+    private void initReferenceDataBroadCasting() {
+        HerronDataLoading start = new HerronDataLoading(Instant.now().toEpochMilli(), DataLoadingStateEnum.START);
+        LOGGER.info("Init reference data loading");
+        broadcastMessage(start);
+        broadCastFromRepository();
+        HerronDataLoading done = new HerronDataLoading(Instant.now().toEpochMilli(), DataLoadingStateEnum.DONE);
+        broadcastMessage(done);
+        LOGGER.info("Done reference data loading");
+    }
+
+    private void broadCastFromRepository() {
+        LOGGER.info("Init broadcasting reference data from repository.");
+        repository.getMarkets().forEach(this::broadcastMessage);
+        repository.getInstruments().forEach(this::broadcastMessage);
+        repository.getOrderbookData().forEach(this::broadcastMessage);
+        LOGGER.info("Done broadcasting reference data from repository.");
+    }
 }

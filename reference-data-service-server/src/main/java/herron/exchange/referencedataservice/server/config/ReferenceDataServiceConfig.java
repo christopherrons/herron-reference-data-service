@@ -12,9 +12,12 @@ import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronMar
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronOrderbookData;
 import com.herron.exchange.common.api.common.model.BusinessCalendar;
 import herron.exchange.referencedataservice.server.ReferenceDataServiceBootloader;
-import herron.exchange.referencedataservice.server.external.EurexReferenceDataApiClient;
+import herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
+import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataApiClient;
+import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
 import herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -72,9 +75,25 @@ public class ReferenceDataServiceConfig {
         return new ReferenceDataRepository(cache);
     }
 
+    @Bean
+    public EurexReferenceDataApiClient eurexReferenceDataApiClient(@Value("reference-data.external.eurex.api-key") String apiKey) {
+        return new EurexReferenceDataApiClient(apiKey);
+    }
+
+    @Bean
+    public EurexReferenceDataHandler eurexReferenceDataHandler(EurexReferenceDataApiClient eurexReferenceDataApiClient) {
+        return new EurexReferenceDataHandler(eurexReferenceDataApiClient);
+    }
+
+    @Bean
+    public ExternalReferenceDataHandler externalReferenceDataHandler(EurexReferenceDataHandler eurexReferenceDataHandler) {
+        return new ExternalReferenceDataHandler(eurexReferenceDataHandler);
+    }
+
     @Bean(initMethod = "init")
     public ReferenceDataServiceBootloader referenceDataServiceBootloader(ReferenceDataRepository referenceDataRepository,
-                                                                         KafkaTemplate<String, Object> kafkaTemplate) {
-        return new ReferenceDataServiceBootloader(referenceDataRepository, kafkaTemplate, new EurexReferenceDataApiClient());
+                                                                         KafkaTemplate<String, Object> kafkaTemplate,
+                                                                         ExternalReferenceDataHandler externalReferenceDataHandler) {
+        return new ReferenceDataServiceBootloader(referenceDataRepository, kafkaTemplate, externalReferenceDataHandler);
     }
 }

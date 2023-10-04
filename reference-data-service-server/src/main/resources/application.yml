@@ -6,3 +6,8 @@ kafka:
   topic:
     reference-data:
       nr-of-partitions: 1
+
+reference-data:
+  external:
+    eurex:
+      api-key: "e4182894-f5e1-42ae-90a7-7f04d760cd62"

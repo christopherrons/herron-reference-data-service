@@ -6,7 +6,7 @@ import com.herron.exchange.common.api.common.logging.EventLogger;
 import com.herron.exchange.common.api.common.messages.KafkaBroadCastProducer;
 import com.herron.exchange.common.api.common.messages.common.HerronDataLoading;
 import com.herron.exchange.common.api.common.model.PartitionKey;
-import herron.exchange.referencedataservice.server.external.EurexReferenceDataApiClient;
+import herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
 import herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +18,14 @@ public class ReferenceDataServiceBootloader extends KafkaBroadCastProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceDataServiceBootloader.class);
     private final ReferenceDataRepository repository;
-    private final EurexReferenceDataApiClient eurexReferenceDataApiClient;
+    private final ExternalReferenceDataHandler externalReferenceDataHandler;
 
     public ReferenceDataServiceBootloader(ReferenceDataRepository repository,
                                           KafkaTemplate<String, Object> kafkaTemplate,
-                                          EurexReferenceDataApiClient eurexReferenceDataApiClient) {
+                                          ExternalReferenceDataHandler externalReferenceDataHandler) {
         super(new PartitionKey(KafkaTopicEnum.HERRON_REFERENCE_DATA, 0), kafkaTemplate, new EventLogger(1));
         this.repository = repository;
-        this.eurexReferenceDataApiClient = eurexReferenceDataApiClient;
+        this.externalReferenceDataHandler = externalReferenceDataHandler;
     }
 
     public void init() {
@@ -45,7 +45,7 @@ public class ReferenceDataServiceBootloader extends KafkaBroadCastProducer {
     }
 
     private void broadCastExternalReferenceData() {
-        eurexReferenceDataApiClient.getEurexInstruments().forEach(this::broadcastMessage);
+        externalReferenceDataHandler.getInstruments().forEach(this::broadcastMessage);
     }
 
     private void broadcastFromRepository() {

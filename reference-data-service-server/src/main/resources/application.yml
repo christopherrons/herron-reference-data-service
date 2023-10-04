@@ -1,16 +1,8 @@
 spring:
   kafka:
-    bootstrap-servers: "exchange-1.int.herron.se:9092"
+    bootstrap-servers: "localhost:9092"
 
 kafka:
   topic:
-    bitstamp-market-data:
-      nr-of-partitions: 2
-
-subscription-config:
-  uri: wss://ws.bitstamp.net
-  channels:
-    - live_orders_btceur
-    - live_orders_btcusd
-    - live_orders_xrpeur
-    - live_orders_xrpusd
+    reference-data:
+      nr-of-partitions: 1

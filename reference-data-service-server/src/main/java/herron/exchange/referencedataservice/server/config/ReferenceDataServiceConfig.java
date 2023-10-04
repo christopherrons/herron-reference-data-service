@@ -7,17 +7,19 @@ import com.herron.exchange.common.api.common.api.OrderbookData;
 import com.herron.exchange.common.api.common.cache.ReferenceDataCache;
 import com.herron.exchange.common.api.common.enums.AuctionAlgorithmEnum;
 import com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum;
-import com.herron.exchange.common.api.common.messages.refdata.HerronMarket;
-import com.herron.exchange.common.api.common.messages.refdata.HerronOrderbookData;
-import com.herron.exchange.common.api.common.messages.refdata.HerronStockInstrument;
+import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronEquityInstrument;
+import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronMarket;
+import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronOrderbookData;
 import com.herron.exchange.common.api.common.model.BusinessCalendar;
 import herron.exchange.referencedataservice.server.ReferenceDataServiceBootloader;
+import herron.exchange.referencedataservice.server.external.EurexReferenceDataApiClient;
 import herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Configuration
@@ -25,24 +27,33 @@ public class ReferenceDataServiceConfig {
 
     @Bean
     public Market mockBitstampMarket() {
-        return new HerronMarket("bitstamp", BusinessCalendar.defaultWeekendCalendar());
+        return ImmutableHerronMarket.builder()
+                .marketId("bitstamp")
+                .businessCalendar(BusinessCalendar.defaultWeekendCalendar())
+                .build();
     }
 
     @Bean
     public Instrument mockBTCUSDInstrument(@Qualifier("mockBitstampMarket") Market market) {
-        return new HerronStockInstrument("stock_btcusd_bitstamp", market.marketId(), "usd");
+        return ImmutableHerronEquityInstrument.builder()
+                .instrumentId("stock_btcusd_bitstamp")
+                .marketId(market.marketId())
+                .currency("usd")
+                .firstTradingDate(LocalDate.MIN)
+                .lastTradingDate(LocalDate.MAX)
+                .build();
     }
 
     @Bean
     public OrderbookData mockBTCUSD(@Qualifier("mockBTCUSDInstrument") Instrument mockBTCUSDInstrument) {
-        return new HerronOrderbookData(
-                mockBTCUSDInstrument.instrumentId(),
-                mockBTCUSDInstrument.instrumentId(),
-                MatchingAlgorithmEnum.FIFO,
-                mockBTCUSDInstrument.currency(),
-                0,
-                AuctionAlgorithmEnum.DUTCH
-        );
+        return ImmutableHerronOrderbookData.builder()
+                .instrumentId(mockBTCUSDInstrument.instrumentId())
+                .orderbookId(mockBTCUSDInstrument.instrumentId())
+                .matchingAlgorithm(MatchingAlgorithmEnum.FIFO)
+                .tradingCurrency(mockBTCUSDInstrument.currency())
+                .minTradeVolume(0)
+                .auctionAlgorithm(AuctionAlgorithmEnum.DUTCH)
+                .build();
     }
 
     @Bean
@@ -64,6 +75,6 @@ public class ReferenceDataServiceConfig {
     @Bean(initMethod = "init")
     public ReferenceDataServiceBootloader referenceDataServiceBootloader(ReferenceDataRepository referenceDataRepository,
                                                                          KafkaTemplate<String, Object> kafkaTemplate) {
-        return new ReferenceDataServiceBootloader(referenceDataRepository, kafkaTemplate);
+        return new ReferenceDataServiceBootloader(referenceDataRepository, kafkaTemplate, new EurexReferenceDataApiClient());
     }
 }

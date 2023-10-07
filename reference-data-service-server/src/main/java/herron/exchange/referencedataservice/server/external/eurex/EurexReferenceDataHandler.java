@@ -1,85 +1,86 @@
 package herron.exchange.referencedataservice.server.external.eurex;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.herron.exchange.common.api.common.api.Instrument;
-import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronFutureInstrument;
-import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronOptionInstrument;
+import com.herron.exchange.common.api.common.api.OrderbookData;
 import herron.exchange.referencedataservice.server.external.eurex.model.EurexContractData;
+import herron.exchange.referencedataservice.server.external.eurex.model.EurexHolidayData;
+import herron.exchange.referencedataservice.server.external.eurex.model.EurexProductData;
+import herron.exchange.referencedataservice.server.external.eurex.model.EurexTradingHoursData;
+import herron.exchange.referencedataservice.server.external.model.ReferenceDataResult;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.herron.exchange.common.api.common.enums.OptionExerciseTyleEnum.AMERICAN;
-import static com.herron.exchange.common.api.common.enums.OptionExerciseTyleEnum.EUROPEAN;
-import static com.herron.exchange.common.api.common.enums.OptionTypeEnum.CALL;
-import static com.herron.exchange.common.api.common.enums.OptionTypeEnum.PUT;
-import static com.herron.exchange.common.api.common.enums.SettlementTypeEnum.CASH;
-import static com.herron.exchange.common.api.common.enums.SettlementTypeEnum.PHYSICAL;
+import static herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataUtil.mapFuture;
+import static herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataUtil.mapOption;
 
 public class EurexReferenceDataHandler {
-    private static final String MARKET_ID = "EUREX";
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final EurexReferenceDataApiClient client;
 
     public EurexReferenceDataHandler(EurexReferenceDataApiClient client) {
         this.client = client;
     }
 
-    public List<Instrument> getEurexInstruments() {
-        return getInstruments("tmp");
-    }
-
-    private List<Instrument> getInstruments(String tmp) {
-        var eurexReferenceData = client.fetchContractReferenceData();
-        if (eurexReferenceData == null) {
-            return List.of();
+    public ReferenceDataResult getEurexReferenceData() {
+        var eurexProductData = client.fetchProductData();
+        if (eurexProductData == null) {
+            return new ReferenceDataResult(List.of(), List.of());
         }
 
-        return mapEurexContractToInstrument(eurexReferenceData.data().contracts().data());
+        EurexTradingHoursData eurexTradingHoursData = client.fetchTradingHourData();
+        if (eurexTradingHoursData == null) {
+            return new ReferenceDataResult(List.of(), List.of());
+        }
+
+        EurexHolidayData eurexHolidayData = client.fetchHolidayData();
+        if (eurexHolidayData == null) {
+            return new ReferenceDataResult(List.of(), List.of());
+        }
+
+        List<EurexContractData> eurexContractDataList = client.fetchContractData(eurexProductData);
+        if (eurexContractDataList == null) {
+            return new ReferenceDataResult(List.of(), List.of());
+        }
+
+        var instruments = mapInstruments(eurexContractDataList, eurexProductData);
+        var orderbookData = mapOrderbookData(eurexContractDataList, eurexProductData);
+        return new ReferenceDataResult(instruments, orderbookData);
     }
 
-    private List<Instrument> mapEurexContractToInstrument(List<EurexContractData.Contract> contracts) {
-        List<Instrument> eurexInstruments = new ArrayList<>();
-        for (var contractData : contracts) {
+    private List<Instrument> mapInstruments(List<EurexContractData> eurexContractDataList, EurexProductData eurexProductData) {
+        return eurexContractDataList.stream()
+                .flatMap(eurexContractData -> mapInstruments(eurexContractData, eurexProductData).stream())
+                .toList();
+    }
+
+    private List<Instrument> mapInstruments(EurexContractData eurexContractData, EurexProductData eurexProductData) {
+        var productIdToProductInfo = eurexProductData.getByProductId();
+        List<Instrument> instruments = new ArrayList<>();
+        for (var contractData : eurexContractData.data().contracts().data()) {
+            EurexProductData.ProductInfo productInfo = productIdToProductInfo.get(contractData.productID());
             if (contractData.isOption()) {
-                eurexInstruments.add(mapOption(contractData));
+                instruments.add(mapOption(contractData, productInfo));
             } else {
-                eurexInstruments.add(mapFuture(contractData));
+                instruments.add(mapFuture(contractData, productInfo));
             }
         }
-        return eurexInstruments;
+        return instruments;
     }
 
-    private Instrument mapFuture(EurexContractData.Contract contract) {
-        return ImmutableHerronFutureInstrument.builder()
-                .contractSize(contract.contractSize())
-                .instrumentId(contract.instrumentID())
-                .marketId(MARKET_ID)
-                .currency("EUR") //FIXME: Get from product info
-                .underLyingInstrumentId(contract.instrumentID()) //FIXME: Get from product info
-                .firstTradingDate(LocalDate.parse(contract.firstTradingDate(), DATE_TIME_FORMATTER))
-                .lastTradingDate(LocalDate.parse(contract.firstTradingDate(), DATE_TIME_FORMATTER))
-                .maturityDate(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER))
-                .settlementType(contract.isPhysical() ? PHYSICAL : CASH)
-                .build();
+    private List<OrderbookData> mapOrderbookData(List<EurexContractData> eurexContractDataList, EurexProductData eurexProductData) {
+        return eurexContractDataList.stream()
+                .flatMap(eurexContractData -> mapOrderbookData(eurexContractData, eurexProductData).stream())
+                .toList();
     }
 
-    private Instrument mapOption(EurexContractData.Contract contract) {
-        return ImmutableHerronOptionInstrument.builder()
-                .contractSize(contract.contractSize())
-                .instrumentId(contract.instrumentID())
-                .marketId(MARKET_ID)
-                .currency("EUR") //FIXME: Get from product info
-                .underLyingInstrumentId(contract.instrumentID()) //FIXME: Get from product info
-                .firstTradingDate(LocalDate.parse(contract.firstTradingDate(), DATE_TIME_FORMATTER))
-                .lastTradingDate(LocalDate.parse(contract.firstTradingDate(), DATE_TIME_FORMATTER))
-                .maturityDate(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER))
-                .settlementType(contract.isPhysical() ? PHYSICAL : CASH)
-                .strikePrice(Double.parseDouble(contract.strike()))
-                .optionType(contract.isCall() ? CALL : PUT)
-                .optionExerciseStyle(contract.isAmerican() ? AMERICAN : EUROPEAN)
-                .build();
+    private List<OrderbookData> mapOrderbookData(EurexContractData eurexContractData, EurexProductData eurexProductData) {
+        var productIdToProductInfo = eurexProductData.getByProductId();
+        List<OrderbookData> orderbookData = new ArrayList<>();
+        for (var contractData : eurexContractData.data().contracts().data()) {
+            EurexProductData.ProductInfo productInfo = productIdToProductInfo.get(contractData.productID());
+            orderbookData.add(EurexReferenceDataUtil.mapOrderbookData(contractData, productInfo));
+        }
+        return orderbookData;
     }
+
 }

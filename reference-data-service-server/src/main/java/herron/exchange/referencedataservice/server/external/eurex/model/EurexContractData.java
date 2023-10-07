@@ -16,7 +16,8 @@ public record EurexContractData(@JsonProperty("data") Data data) {
 
     public record Contract(
             @JsonProperty("InstrumentID") String instrumentID,
-            @JsonProperty("ContractID") long contractID,
+            @JsonProperty("ContractID") String contractID,
+            @JsonProperty("ProductID") String productID,
             @JsonProperty("ContractSize") int contractSize,
             @JsonProperty("CallPut") String callPut,
             @JsonProperty("Strike") String strike,
@@ -27,6 +28,7 @@ public record EurexContractData(@JsonProperty("data") Data data) {
             @JsonProperty("LastTradingDate") String lastTradingDate,
             @JsonProperty("OptionsDelta") String optionsDelta,
             @JsonProperty("ExerciseStyle") String exerciseStyle,
+            @JsonProperty("ISIN") String isin,
             @JsonProperty("PreviousDaySettlementPrice") double previousDaySettlementPrice) {
 
         public boolean isOption() {

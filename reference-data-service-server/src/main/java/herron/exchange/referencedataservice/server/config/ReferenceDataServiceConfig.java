@@ -15,6 +15,7 @@ import herron.exchange.referencedataservice.server.ReferenceDataServiceBootloade
 import herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
 import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataApiClient;
 import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
+import herron.exchange.referencedataservice.server.external.eurex.model.EurexApiClientProperties;
 import herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,8 +77,14 @@ public class ReferenceDataServiceConfig {
     }
 
     @Bean
-    public EurexReferenceDataApiClient eurexReferenceDataApiClient(@Value("reference-data.external.eurex.api-key") String apiKey) {
-        return new EurexReferenceDataApiClient(apiKey);
+    public EurexApiClientProperties eurexApiClientProperties(@Value("${reference-data.external.eurex.api-key}") String apiKey,
+                                                             @Value("${reference-data.external.eurex.api-url}") String url) {
+        return new EurexApiClientProperties(url, apiKey);
+    }
+
+    @Bean
+    public EurexReferenceDataApiClient eurexReferenceDataApiClient(EurexApiClientProperties eurexApiClientProperties) {
+        return new EurexReferenceDataApiClient(eurexApiClientProperties);
     }
 
     @Bean

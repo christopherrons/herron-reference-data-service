@@ -1,7 +1,7 @@
 package herron.exchange.referencedataservice.server.external;
 
-import com.herron.exchange.common.api.common.api.Instrument;
 import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
+import herron.exchange.referencedataservice.server.external.model.ReferenceDataResult;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public class ExternalReferenceDataHandler {
         this.eurexReferenceDataHandler = eurexReferenceDataHandler;
     }
 
-    public List<Instrument> getInstruments() {
-        return eurexReferenceDataHandler.getEurexInstruments();
+    public List<ReferenceDataResult> getReferenceData() {
+        return List.of(eurexReferenceDataHandler.getEurexReferenceData());
     }
 }

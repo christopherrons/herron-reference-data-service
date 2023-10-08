@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 public record EurexProductData(@JsonProperty("data") Data data) {
 
+    public Map<String, ProductInfo> getByProductId() {
+        return data().productInfos().data().stream().collect(Collectors.toMap(EurexProductData.ProductInfo::productId, Function.identity()));
+    }
+
     public record Data(@JsonProperty("ProductInfos") ProductInfos productInfos) {
     }
 
@@ -26,9 +30,5 @@ public record EurexProductData(@JsonProperty("data") Data data) {
             @JsonProperty("Underlying") String underlying,
             @JsonProperty("UnderlyingName") String underlyingName,
             @JsonProperty("UnderlyingISIN") String underlyingIsin) {
-    }
-
-    public Map<String, ProductInfo> getByProductId() {
-        return data().productInfos().data().stream().collect(Collectors.toMap(EurexProductData.ProductInfo::productId, Function.identity()));
     }
 }

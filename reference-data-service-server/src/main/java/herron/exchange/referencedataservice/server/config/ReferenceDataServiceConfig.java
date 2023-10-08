@@ -1,23 +1,25 @@
 package herron.exchange.referencedataservice.server.config;
 
 
-import com.herron.exchange.common.api.common.api.Instrument;
-import com.herron.exchange.common.api.common.api.Market;
-import com.herron.exchange.common.api.common.api.OrderbookData;
+import com.herron.exchange.common.api.common.api.referencedata.exchange.Market;
+import com.herron.exchange.common.api.common.api.referencedata.exchange.Product;
+import com.herron.exchange.common.api.common.api.referencedata.instruments.Instrument;
+import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
 import com.herron.exchange.common.api.common.cache.ReferenceDataCache;
 import com.herron.exchange.common.api.common.enums.AuctionAlgorithmEnum;
 import com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum;
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronEquityInstrument;
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronMarket;
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronOrderbookData;
-import com.herron.exchange.common.api.common.model.BusinessCalendar;
+import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronProduct;
+import com.herron.exchange.common.api.common.model.HerronBusinessCalendar;
+import com.herron.exchange.common.api.common.model.HerronTradingCalendar;
 import herron.exchange.referencedataservice.server.ReferenceDataServiceBootloader;
 import herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
 import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataApiClient;
 import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
 import herron.exchange.referencedataservice.server.external.eurex.model.EurexApiClientProperties;
 import herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,30 +35,40 @@ public class ReferenceDataServiceConfig {
     public Market mockBitstampMarket() {
         return ImmutableHerronMarket.builder()
                 .marketId("bitstamp")
-                .businessCalendar(BusinessCalendar.defaultWeekendCalendar())
+                .businessCalendar(HerronBusinessCalendar.defaultWeekendCalendar())
                 .build();
     }
 
     @Bean
-    public Instrument mockBTCUSDInstrument(@Qualifier("mockBitstampMarket") Market market) {
-        return ImmutableHerronEquityInstrument.builder()
-                .instrumentId("stock_btcusd_bitstamp")
-                .marketId(market.marketId())
+    public Product mockBitstampProduct(Market market) {
+        return ImmutableHerronProduct.builder()
+                .market(market)
+                .productId(String.format("%s_equity", market.marketId()))
                 .currency("usd")
+                .build();
+    }
+
+    @Bean
+    public Instrument mockBTCUSDInstrument(Product product) {
+        return ImmutableHerronEquityInstrument.builder()
+                .instrumentId(String.format("%s_btcusd", product.productId()))
+                .product(product)
                 .firstTradingDate(LocalDate.MIN)
                 .lastTradingDate(LocalDate.MAX)
                 .build();
     }
 
     @Bean
-    public OrderbookData mockBTCUSD(@Qualifier("mockBTCUSDInstrument") Instrument mockBTCUSDInstrument) {
+    public OrderbookData mockBTCUSD(Instrument instrument) {
         return ImmutableHerronOrderbookData.builder()
-                .instrumentId(mockBTCUSDInstrument.instrumentId())
-                .orderbookId(mockBTCUSDInstrument.instrumentId())
+                .instrument(instrument)
+                .orderbookId(instrument.instrumentId())
                 .matchingAlgorithm(MatchingAlgorithmEnum.FIFO)
-                .tradingCurrency(mockBTCUSDInstrument.currency())
-                .minTradeVolume(0)
+                .tradingCurrency(instrument.currency())
                 .auctionAlgorithm(AuctionAlgorithmEnum.DUTCH)
+                .tradingCalendar(HerronTradingCalendar.twentyFourSevenTradingCalendar())
+                .tickValue(1)
+                .tickSize(1)
                 .build();
     }
 
@@ -78,8 +90,9 @@ public class ReferenceDataServiceConfig {
 
     @Bean
     public EurexApiClientProperties eurexApiClientProperties(@Value("${reference-data.external.eurex.api-key}") String apiKey,
-                                                             @Value("${reference-data.external.eurex.api-url}") String url) {
-        return new EurexApiClientProperties(url, apiKey);
+                                                             @Value("${reference-data.external.eurex.api-url}") String url,
+                                                             @Value("${reference-data.external.eurex.contractRequestLimit}") int contractRequestLimit) {
+        return new EurexApiClientProperties(url, apiKey, contractRequestLimit);
     }
 
     @Bean

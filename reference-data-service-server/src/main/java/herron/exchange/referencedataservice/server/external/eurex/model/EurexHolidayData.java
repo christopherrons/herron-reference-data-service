@@ -9,6 +9,26 @@ import java.util.stream.Collectors;
 
 public record EurexHolidayData(@JsonProperty("data") Data data) {
 
+    public Set<String> getProductSpecificHolidays(String productId) {
+        return getProductSpecificHolidays().getOrDefault(productId, Set.of());
+    }
+
+    public Map<String, Set<String>> getProductSpecificHolidays() {
+        return data.holidays.data.stream()
+                .filter(Holiday::isInstrumentSpecificHoliday)
+                .collect(Collectors.groupingBy(Holiday::productId, Collectors.mapping(Holiday::holiday, Collectors.toSet())));
+    }
+
+    public Set<String> getExchangeHolidays(String productId) {
+        return getExchangeHolidays().getOrDefault(productId, Set.of());
+    }
+
+    public Map<String, Set<String>> getExchangeHolidays() {
+        return data.holidays.data.stream()
+                .filter(Holiday::isExchangeHoliday)
+                .collect(Collectors.groupingBy(Holiday::productId, Collectors.mapping(Holiday::holiday, Collectors.toSet())));
+    }
+
     public record Data(@JsonProperty("Holidays") Holidays holidays) {
     }
 
@@ -27,19 +47,7 @@ public record EurexHolidayData(@JsonProperty("data") Data data) {
         }
 
         private boolean isExchangeHoliday() {
-            return exchangeHolidayFlag.equals("1");
+            return !isInstrumentSpecificHoliday();
         }
-    }
-
-    public Map<String, Set<String>> getProductSpecificHolidays() {
-        return data.holidays.data.stream()
-                .filter(Holiday::isInstrumentSpecificHoliday)
-                .collect(Collectors.groupingBy(Holiday::productId, Collectors.mapping(Holiday::holiday, Collectors.toSet())));
-    }
-
-    public Map<String, Set<String>> getExchangeHolidays() {
-        return data.holidays.data.stream()
-                .filter(Holiday::isExchangeHoliday)
-                .collect(Collectors.groupingBy(Holiday::productId, Collectors.mapping(Holiday::holiday, Collectors.toSet())));
     }
 }

@@ -41,6 +41,7 @@ public class ReferenceDataServiceBootloader extends KafkaBroadCastProducer {
     private void broadcastFromRepository() {
         LOGGER.info("Init broadcasting reference data from repository.");
         repository.getMarkets().forEach(this::broadcastMessage);
+        repository.getProducts().forEach(this::broadcastMessage);
         repository.getInstruments().forEach(this::broadcastMessage);
         repository.getOrderbookData().forEach(this::broadcastMessage);
         LOGGER.info("Done broadcasting reference data from repository.");
@@ -49,6 +50,8 @@ public class ReferenceDataServiceBootloader extends KafkaBroadCastProducer {
     private void broadCastExternalReferenceData() {
         LOGGER.info("Init broadcasting external reference data.");
         externalReferenceDataHandler.getReferenceData().forEach(referenceDataResult -> {
+            referenceDataResult.markets().forEach(this::broadcastMessage);
+            referenceDataResult.products().forEach(this::broadcastMessage);
             referenceDataResult.orderbookData().forEach(this::broadcastMessage);
             referenceDataResult.instruments().forEach(this::broadcastMessage);
         });

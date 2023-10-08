@@ -12,7 +12,7 @@
 
     <appender name="RollingFile"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/bitstamp-consumer.log</file>
+        <file>${LOGS}/reference-data-service.log</file>
         <encoder
                 class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</Pattern>
@@ -21,7 +21,7 @@
         <!-- rollover daily or when the file reaches 1000000MB MegaBytes -->
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/bitstamp-consumer-%d{yyyy-MM-dd}.%i.log
+            <fileNamePattern>${LOGS}/archived/reference-data-service-%d{yyyy-MM-dd}.%i.log
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">

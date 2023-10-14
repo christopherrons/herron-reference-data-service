@@ -8,17 +8,18 @@ import com.herron.exchange.common.api.common.api.referencedata.orderbook.Orderbo
 import com.herron.exchange.common.api.common.cache.ReferenceDataCache;
 import com.herron.exchange.common.api.common.enums.AuctionAlgorithmEnum;
 import com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum;
+import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronEquityInstrument;
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronMarket;
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronOrderbookData;
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronProduct;
 import com.herron.exchange.common.api.common.model.HerronBusinessCalendar;
 import com.herron.exchange.common.api.common.model.HerronTradingCalendar;
+import com.herron.exchange.integrations.generator.eurex.EurexReferenceDataApiClient;
+import com.herron.exchange.integrations.generator.eurex.model.EurexApiClientProperties;
 import herron.exchange.referencedataservice.server.ReferenceDataServiceBootloader;
 import herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
-import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataApiClient;
 import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
-import herron.exchange.referencedataservice.server.external.eurex.model.EurexApiClientProperties;
 import herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -110,10 +111,15 @@ public class ReferenceDataServiceConfig {
         return new ExternalReferenceDataHandler(eurexReferenceDataHandler);
     }
 
+    @Bean
+    public KafkaBroadcastHandler kafkaBroadcastHandler(KafkaTemplate<String, Object> kafkaTemplate) {
+        return new KafkaBroadcastHandler(kafkaTemplate);
+    }
+
     @Bean(initMethod = "init")
     public ReferenceDataServiceBootloader referenceDataServiceBootloader(ReferenceDataRepository referenceDataRepository,
-                                                                         KafkaTemplate<String, Object> kafkaTemplate,
-                                                                         ExternalReferenceDataHandler externalReferenceDataHandler) {
-        return new ReferenceDataServiceBootloader(referenceDataRepository, kafkaTemplate, externalReferenceDataHandler);
+                                                                         ExternalReferenceDataHandler externalReferenceDataHandler,
+                                                                         KafkaBroadcastHandler kafkaBroadcastHandler) {
+        return new ReferenceDataServiceBootloader(referenceDataRepository, externalReferenceDataHandler, kafkaBroadcastHandler);
     }
 }

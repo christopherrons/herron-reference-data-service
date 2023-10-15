@@ -17,7 +17,7 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic referenceDataTrailTopic() {
         return TopicBuilder
-                .name(KafkaTopicEnum.HERRON_REFERENCE_DATA.getTopicName())
+                .name(KafkaTopicEnum.REFERENCE_DATA.getTopicName())
                 .partitions(nrOfPartitions)
                 .build();
     }

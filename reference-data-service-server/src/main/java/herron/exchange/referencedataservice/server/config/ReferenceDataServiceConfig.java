@@ -9,12 +9,12 @@ import com.herron.exchange.common.api.common.cache.ReferenceDataCache;
 import com.herron.exchange.common.api.common.enums.AuctionAlgorithmEnum;
 import com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum;
 import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
-import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronEquityInstrument;
-import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronMarket;
-import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronOrderbookData;
-import com.herron.exchange.common.api.common.messages.refdata.ImmutableHerronProduct;
-import com.herron.exchange.common.api.common.model.HerronBusinessCalendar;
-import com.herron.exchange.common.api.common.model.HerronTradingCalendar;
+import com.herron.exchange.common.api.common.messages.common.DefaultBusinessCalendar;
+import com.herron.exchange.common.api.common.messages.refdata.ImmutableDefaultEquityInstrument;
+import com.herron.exchange.common.api.common.messages.refdata.ImmutableDefaultMarket;
+import com.herron.exchange.common.api.common.messages.refdata.ImmutableDefaultOrderbookData;
+import com.herron.exchange.common.api.common.messages.refdata.ImmutableDefaultProduct;
+import com.herron.exchange.common.api.common.messages.trading.DefaultTradingCalendar;
 import com.herron.exchange.integrations.generator.eurex.EurexReferenceDataApiClient;
 import com.herron.exchange.integrations.generator.eurex.model.EurexApiClientProperties;
 import herron.exchange.referencedataservice.server.ReferenceDataServiceBootloader;
@@ -34,15 +34,15 @@ public class ReferenceDataServiceConfig {
 
     @Bean
     public Market mockBitstampMarket() {
-        return ImmutableHerronMarket.builder()
+        return ImmutableDefaultMarket.builder()
                 .marketId("bitstamp")
-                .businessCalendar(HerronBusinessCalendar.defaultWeekendCalendar())
+                .businessCalendar(DefaultBusinessCalendar.defaultWeekendCalendar())
                 .build();
     }
 
     @Bean
     public Product mockBitstampProduct(Market market) {
-        return ImmutableHerronProduct.builder()
+        return ImmutableDefaultProduct.builder()
                 .market(market)
                 .productId(String.format("%s_equity", market.marketId()))
                 .currency("usd")
@@ -51,7 +51,7 @@ public class ReferenceDataServiceConfig {
 
     @Bean
     public Instrument mockBTCUSDInstrument(Product product) {
-        return ImmutableHerronEquityInstrument.builder()
+        return ImmutableDefaultEquityInstrument.builder()
                 .instrumentId(String.format("%s_btcusd", product.productId()))
                 .product(product)
                 .firstTradingDate(LocalDate.MIN)
@@ -61,13 +61,13 @@ public class ReferenceDataServiceConfig {
 
     @Bean
     public OrderbookData mockBTCUSD(Instrument instrument) {
-        return ImmutableHerronOrderbookData.builder()
+        return ImmutableDefaultOrderbookData.builder()
                 .instrument(instrument)
                 .orderbookId(instrument.instrumentId())
                 .matchingAlgorithm(MatchingAlgorithmEnum.FIFO)
                 .tradingCurrency(instrument.currency())
                 .auctionAlgorithm(AuctionAlgorithmEnum.DUTCH)
-                .tradingCalendar(HerronTradingCalendar.twentyFourSevenTradingCalendar())
+                .tradingCalendar(DefaultTradingCalendar.twentyFourSevenTradingCalendar())
                 .tickValue(1)
                 .tickSize(1)
                 .build();

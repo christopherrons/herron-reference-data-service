@@ -6,9 +6,9 @@ import com.herron.exchange.common.api.common.api.referencedata.exchange.Product;
 import com.herron.exchange.common.api.common.api.referencedata.exchange.TradingCalendar;
 import com.herron.exchange.common.api.common.api.referencedata.instruments.Instrument;
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
+import com.herron.exchange.common.api.common.messages.common.ImmutableDefaultBusinessCalendar;
 import com.herron.exchange.common.api.common.messages.refdata.*;
-import com.herron.exchange.common.api.common.model.ImmutableHerronBusinessCalendar;
-import com.herron.exchange.common.api.common.model.ImmutableHerronTradingCalendar;
+import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultTradingCalendar;
 import com.herron.exchange.integrations.generator.eurex.model.EurexContractData;
 import com.herron.exchange.integrations.generator.eurex.model.EurexHolidayData;
 import com.herron.exchange.integrations.generator.eurex.model.EurexProductData;
@@ -38,7 +38,7 @@ public class EurexReferenceDataUtil {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     public static Market mapMarket(EurexHolidayData holidayData) {
-        return ImmutableHerronMarket.builder()
+        return ImmutableDefaultMarket.builder()
                 .marketId(MARKET_ID)
                 .businessCalendar(mapMarketBusinessCalendar(holidayData))
                 .build();
@@ -49,7 +49,7 @@ public class EurexReferenceDataUtil {
                 .flatMap(Collection::stream)
                 .map(holiday -> LocalDate.parse(holiday, DATE_TIME_FORMATTER))
                 .toList();
-        return ImmutableHerronBusinessCalendar.builder()
+        return ImmutableDefaultBusinessCalendar.builder()
                 .calendarId(String.format("%s Business Calendar", MARKET_ID))
                 .holidays(holidays)
                 .build();
@@ -58,7 +58,7 @@ public class EurexReferenceDataUtil {
     public static Product mapProduct(Market market,
                                      EurexProductData.ProductInfo productInfo,
                                      EurexHolidayData holidayData) {
-        return ImmutableHerronProduct.builder()
+        return ImmutableDefaultProduct.builder()
                 .productId(productInfo.productId())
                 .market(market)
                 .currency(productInfo.currency())
@@ -74,7 +74,7 @@ public class EurexReferenceDataUtil {
                 )
                 .map(holiday -> LocalDate.parse(holiday, DATE_TIME_FORMATTER))
                 .toList();
-        return ImmutableHerronBusinessCalendar.builder()
+        return ImmutableDefaultBusinessCalendar.builder()
                 .calendarId(String.format("%s Business Calendar", MARKET_ID))
                 .holidays(holidays)
                 .build();
@@ -84,7 +84,7 @@ public class EurexReferenceDataUtil {
                                                  EurexProductData.ProductInfo productInfo,
                                                  Instrument instrument,
                                                  EurexTradingHoursData.TradingHour tradingHour) {
-        return ImmutableHerronOrderbookData.builder()
+        return ImmutableDefaultOrderbookData.builder()
                 .orderbookId(contract.isin())
                 .instrument(instrument)
                 .tradingCurrency(productInfo.currency())
@@ -97,7 +97,7 @@ public class EurexReferenceDataUtil {
     }
 
     public static TradingCalendar mapTradingCalendar(EurexTradingHoursData.TradingHour tradingHour) {
-        var builder = ImmutableHerronTradingCalendar.builder();
+        var builder = ImmutableDefaultTradingCalendar.builder();
         var startContinuousTrading = toLocalTime(tradingHour.startContinuousTrading());
         var endContinuousTrading = toLocalTime(tradingHour.eEndContinuousTrading());
         var endOpenAuction = toLocalTime(tradingHour.endOpeningAuction());
@@ -124,7 +124,7 @@ public class EurexReferenceDataUtil {
     public static Instrument mapFuture(EurexContractData.Contract contract,
                                        EurexProductData.ProductInfo productInfo,
                                        Product product) {
-        return ImmutableHerronFutureInstrument.builder()
+        return ImmutableDefaultFutureInstrument.builder()
                 .contractSize(contract.contractSize() != 0 ? contract.contractSize() : productInfo.contractSize())
                 .instrumentId(contract.isin())
                 .product(product)
@@ -140,7 +140,7 @@ public class EurexReferenceDataUtil {
     public static Instrument mapOption(EurexContractData.Contract contract,
                                        EurexProductData.ProductInfo productInfo,
                                        Product product) {
-        return ImmutableHerronOptionInstrument.builder()
+        return ImmutableDefaultOptionInstrument.builder()
                 .contractSize(contract.contractSize() != 0 ? contract.contractSize() : productInfo.contractSize())
                 .instrumentId(contract.isin())
                 .product(product)

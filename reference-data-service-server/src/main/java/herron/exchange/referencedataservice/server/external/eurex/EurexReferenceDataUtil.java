@@ -115,8 +115,8 @@ public class EurexReferenceDataUtil {
         }
 
         var endPostTrading = startPostTrading.minusMinutes(30);
-        builder.closePostTradingHours(new TradingCalendar.TradingHours(startPostTrading, endPostTrading));
-        builder.closeClosedTradingHours(new TradingCalendar.TradingHours(endPostTrading, LocalTime.MAX));
+        builder.postTradingHours(new TradingCalendar.TradingHours(startPostTrading, endPostTrading));
+        builder.closedTradingHours(new TradingCalendar.TradingHours(endPostTrading, LocalTime.MAX));
 
         return builder
                 .calendarId(String.format("%s Trading Calendar", tradingHour.productId()))

@@ -101,16 +101,23 @@ public class EurexReferenceDataUtil {
         var startContinuousTrading = toLocalTime(tradingHour.startContinuousTrading());
         var endContinuousTrading = toLocalTime(tradingHour.eEndContinuousTrading());
         var endOpenAuction = toLocalTime(tradingHour.endOpeningAuction());
-        endOpenAuction = startContinuousTrading.isAfter(endOpenAuction) ? startContinuousTrading : endOpenAuction;
+        endOpenAuction = startContinuousTrading.isBefore(endOpenAuction) ? startContinuousTrading : endOpenAuction;
         var startOpenAuction = endOpenAuction.minusMinutes(5);
         var endClosingAuction = StringUtils.isNotEmpty(tradingHour.endClosingAuction()) ? toLocalTime(tradingHour.endClosingAuction()) : null;
 
         builder.preTradingHours(new TradingCalendar.TradingHours(LocalTime.MIDNIGHT, startOpenAuction));
-        builder.openAuctionTradingHours(new TradingCalendar.TradingHours(startOpenAuction, startContinuousTrading));
+        builder.openAuctionTradingHours(new TradingCalendar.TradingHours(startOpenAuction, endOpenAuction));
 
+        var startPostTrading = endContinuousTrading;
         if (endClosingAuction != null) {
             builder.closeAuctionTradingHours(new TradingCalendar.TradingHours(endContinuousTrading, endClosingAuction));
+            startPostTrading = endClosingAuction;
         }
+
+        var endPostTrading = startPostTrading.minusMinutes(30);
+        builder.closePostTradingHours(new TradingCalendar.TradingHours(startPostTrading, endPostTrading));
+        builder.closeClosedTradingHours(new TradingCalendar.TradingHours(endPostTrading, LocalTime.MAX));
+
         return builder
                 .calendarId(String.format("%s Trading Calendar", tradingHour.productId()))
                 .continuousTradingHours(new TradingCalendar.TradingHours(startContinuousTrading, endContinuousTrading))

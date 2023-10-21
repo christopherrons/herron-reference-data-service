@@ -1,4 +1,4 @@
-package herron.exchange.referencedataservice.server.config;
+package com.herron.exchange.referencedataservice.server.config;
 
 
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Market;
@@ -15,12 +15,12 @@ import com.herron.exchange.common.api.common.messages.refdata.ImmutableDefaultMa
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableDefaultOrderbookData;
 import com.herron.exchange.common.api.common.messages.refdata.ImmutableDefaultProduct;
 import com.herron.exchange.common.api.common.messages.trading.DefaultTradingCalendar;
-import com.herron.exchange.integrations.generator.eurex.EurexReferenceDataApiClient;
-import com.herron.exchange.integrations.generator.eurex.model.EurexApiClientProperties;
-import herron.exchange.referencedataservice.server.ReferenceDataServiceBootloader;
-import herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
-import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
-import herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
+import com.herron.exchange.integrations.eurex.EurexReferenceDataApiClient;
+import com.herron.exchange.integrations.eurex.model.EurexApiClientProperties;
+import com.herron.exchange.referencedataservice.server.ReferenceDataServiceBootloader;
+import com.herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
+import com.herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
+import com.herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

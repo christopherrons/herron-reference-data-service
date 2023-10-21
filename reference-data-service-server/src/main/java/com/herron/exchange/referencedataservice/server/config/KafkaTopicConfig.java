@@ -1,4 +1,4 @@
-package herron.exchange.referencedataservice.server.config;
+package com.herron.exchange.referencedataservice.server.config;
 
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import org.apache.kafka.clients.admin.NewTopic;

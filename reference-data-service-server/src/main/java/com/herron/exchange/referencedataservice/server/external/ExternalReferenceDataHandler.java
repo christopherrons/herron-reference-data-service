@@ -1,7 +1,7 @@
-package herron.exchange.referencedataservice.server.external;
+package com.herron.exchange.referencedataservice.server.external;
 
-import herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
-import herron.exchange.referencedataservice.server.external.model.ReferenceDataResult;
+import com.herron.exchange.referencedataservice.server.external.model.ReferenceDataResult;
+import com.herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
 
 import java.util.List;
 

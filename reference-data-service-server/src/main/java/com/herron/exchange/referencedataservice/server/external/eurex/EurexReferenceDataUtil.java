@@ -1,4 +1,4 @@
-package herron.exchange.referencedataservice.server.external.eurex;
+package com.herron.exchange.referencedataservice.server.external.eurex;
 
 import com.herron.exchange.common.api.common.api.referencedata.exchange.BusinessCalendar;
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Market;
@@ -9,10 +9,10 @@ import com.herron.exchange.common.api.common.api.referencedata.orderbook.Orderbo
 import com.herron.exchange.common.api.common.messages.common.ImmutableDefaultBusinessCalendar;
 import com.herron.exchange.common.api.common.messages.refdata.*;
 import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultTradingCalendar;
-import com.herron.exchange.integrations.generator.eurex.model.EurexContractData;
-import com.herron.exchange.integrations.generator.eurex.model.EurexHolidayData;
-import com.herron.exchange.integrations.generator.eurex.model.EurexProductData;
-import com.herron.exchange.integrations.generator.eurex.model.EurexTradingHoursData;
+import com.herron.exchange.integrations.eurex.model.EurexContractData;
+import com.herron.exchange.integrations.eurex.model.EurexHolidayData;
+import com.herron.exchange.integrations.eurex.model.EurexProductData;
+import com.herron.exchange.integrations.eurex.model.EurexTradingHoursData;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -60,6 +60,7 @@ public class EurexReferenceDataUtil {
                                      EurexHolidayData holidayData) {
         return ImmutableDefaultProduct.builder()
                 .productId(productInfo.productId())
+                .productName(productInfo.name())
                 .market(market)
                 .currency(productInfo.currency())
                 .businessCalendar(mapProductBusinessCalendar(productInfo, holidayData))

@@ -1,4 +1,4 @@
-package herron.exchange.referencedataservice.server.repository;
+package com.herron.exchange.referencedataservice.server.repository;
 
 
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Market;

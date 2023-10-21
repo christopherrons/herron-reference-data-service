@@ -1,4 +1,4 @@
-package herron.exchange.referencedataservice.server.external.model;
+package com.herron.exchange.referencedataservice.server.external.model;
 
 
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Market;

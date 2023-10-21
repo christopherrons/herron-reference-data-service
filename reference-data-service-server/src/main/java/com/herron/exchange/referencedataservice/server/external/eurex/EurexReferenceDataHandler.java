@@ -1,14 +1,14 @@
-package herron.exchange.referencedataservice.server.external.eurex;
+package com.herron.exchange.referencedataservice.server.external.eurex;
 
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Product;
 import com.herron.exchange.common.api.common.api.referencedata.instruments.Instrument;
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
-import com.herron.exchange.integrations.generator.eurex.EurexReferenceDataApiClient;
-import com.herron.exchange.integrations.generator.eurex.model.EurexContractData;
-import com.herron.exchange.integrations.generator.eurex.model.EurexHolidayData;
-import com.herron.exchange.integrations.generator.eurex.model.EurexProductData;
-import com.herron.exchange.integrations.generator.eurex.model.EurexTradingHoursData;
-import herron.exchange.referencedataservice.server.external.model.ReferenceDataResult;
+import com.herron.exchange.integrations.eurex.EurexReferenceDataApiClient;
+import com.herron.exchange.integrations.eurex.model.EurexContractData;
+import com.herron.exchange.integrations.eurex.model.EurexHolidayData;
+import com.herron.exchange.integrations.eurex.model.EurexProductData;
+import com.herron.exchange.integrations.eurex.model.EurexTradingHoursData;
+import com.herron.exchange.referencedataservice.server.external.model.ReferenceDataResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataUtil.*;
-import static herron.exchange.referencedataservice.server.external.model.ReferenceDataResult.emptyResult;
 
 public class EurexReferenceDataHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(EurexReferenceDataHandler.class);
@@ -37,12 +34,12 @@ public class EurexReferenceDataHandler {
         EurexHolidayData eurexHolidayData = client.fetchHolidayData();
         List<EurexContractData> eurexContractDataList = client.fetchContractData(eurexProductData);
         if (isMissingData(eurexProductData, eurexTradingHoursData, eurexHolidayData, eurexContractDataList)) {
-            return emptyResult();
+            return ReferenceDataResult.emptyResult();
         }
 
-        var market = mapMarket(eurexHolidayData);
+        var market = EurexReferenceDataUtil.mapMarket(eurexHolidayData);
         var products = eurexProductData.data().productInfos().data().stream()
-                .map(p -> mapProduct(market, p, eurexHolidayData))
+                .map(p -> EurexReferenceDataUtil.mapProduct(market, p, eurexHolidayData))
                 .collect(Collectors.toMap(Product::productId, Function.identity()));
         var instruments = mapInstruments(eurexContractDataList, eurexProductData, products).stream()
                 .collect(Collectors.toMap(Instrument::instrumentId, Function.identity()));
@@ -100,9 +97,11 @@ public class EurexReferenceDataHandler {
             EurexProductData.ProductInfo productInfo = productIdToProductInfo.get(contractData.productID());
             Product product = productIdToProduct.get(contractData.productID());
             if (contractData.isOption()) {
-                instruments.add(mapOption(contractData, productInfo, product));
+                instruments.add(EurexReferenceDataUtil.mapOption(contractData, productInfo, product));
+            } else if (contractData.isFuture()) {
+                instruments.add(EurexReferenceDataUtil.mapFuture(contractData, productInfo, product));
             } else {
-                instruments.add(mapFuture(contractData, productInfo, product));
+                LOGGER.error("Unhandled contract type {}", contractData);
             }
         }
         return instruments;

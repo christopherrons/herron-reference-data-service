@@ -1,10 +1,10 @@
-package herron.exchange.referencedataservice.server;
+package com.herron.exchange.referencedataservice.server;
 
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
 import com.herron.exchange.common.api.common.messages.common.PartitionKey;
-import herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
-import herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
+import com.herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
+import com.herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +15,7 @@ public class ReferenceDataServiceBootloader {
     private final ReferenceDataRepository repository;
     private final ExternalReferenceDataHandler externalReferenceDataHandler;
     private final KafkaBroadcastHandler kafkaBroadcastHandler;
+    private final Thread bootloaderThread;
 
     public ReferenceDataServiceBootloader(ReferenceDataRepository repository,
                                           ExternalReferenceDataHandler externalReferenceDataHandler,
@@ -22,10 +23,11 @@ public class ReferenceDataServiceBootloader {
         this.repository = repository;
         this.externalReferenceDataHandler = externalReferenceDataHandler;
         this.kafkaBroadcastHandler = kafkaBroadcastHandler;
+        this.bootloaderThread = new Thread(this::initReferenceDataBroadcasting);
     }
 
     public void init() {
-        initReferenceDataBroadcasting();
+        bootloaderThread.start();
     }
 
 
@@ -35,6 +37,7 @@ public class ReferenceDataServiceBootloader {
         broadCastExternalReferenceData();
         kafkaBroadcastHandler.endBroadCast(REFERENCE_DATA_PARTITION_KEY);
         LOGGER.info("Done reference data loading");
+        bootloaderThread.interrupt();
     }
 
     private void broadcastFromRepository() {

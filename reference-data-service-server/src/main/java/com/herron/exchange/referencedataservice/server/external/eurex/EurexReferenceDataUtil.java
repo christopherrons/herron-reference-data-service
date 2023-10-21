@@ -142,6 +142,7 @@ public class EurexReferenceDataUtil {
                 .lastTradingDate(LocalDate.parse(contract.lastTradingDate(), DATE_TIME_FORMATTER))
                 .maturityDate(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER))
                 .settlementType(contract.isPhysical() ? PHYSICAL : CASH)
+                .priceModelParameters(ImmutableBasicFuturePriceModelParameters.builder().build())
                 .build();
     }
 
@@ -161,6 +162,7 @@ public class EurexReferenceDataUtil {
                 .strikePrice(Double.parseDouble(contract.strike()))
                 .optionType(contract.isCall() ? CALL : PUT)
                 .optionExerciseStyle(contract.isAmerican() ? AMERICAN : EUROPEAN)
+                .priceModelParameters(ImmutableBlackScholesPriceModelParameters.builder().build())
                 .build();
     }
 }

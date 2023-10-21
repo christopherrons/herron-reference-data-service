@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataUtil.mapFuture;
+import static com.herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataUtil.mapOption;
+
 public class EurexReferenceDataHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(EurexReferenceDataHandler.class);
     private final EurexReferenceDataApiClient client;
@@ -97,9 +100,9 @@ public class EurexReferenceDataHandler {
             EurexProductData.ProductInfo productInfo = productIdToProductInfo.get(contractData.productID());
             Product product = productIdToProduct.get(contractData.productID());
             if (contractData.isOption()) {
-                instruments.add(EurexReferenceDataUtil.mapOption(contractData, productInfo, product));
+                instruments.add(mapOption(contractData, productInfo, product));
             } else if (contractData.isFuture()) {
-                instruments.add(EurexReferenceDataUtil.mapFuture(contractData, productInfo, product));
+                instruments.add(mapFuture(contractData, productInfo, product));
             } else {
                 LOGGER.error("Unhandled contract type {}", contractData);
             }

@@ -1,8 +1,8 @@
 package com.herron.exchange.referencedataservice.server.external.eurex;
 
-import com.herron.exchange.common.api.common.api.referencedata.exchange.Product;
 import com.herron.exchange.common.api.common.api.referencedata.instruments.Instrument;
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
+import com.herron.exchange.common.api.common.messages.refdata.Product;
 import com.herron.exchange.integrations.eurex.EurexReferenceDataApiClient;
 import com.herron.exchange.integrations.eurex.model.EurexContractData;
 import com.herron.exchange.integrations.eurex.model.EurexHolidayData;

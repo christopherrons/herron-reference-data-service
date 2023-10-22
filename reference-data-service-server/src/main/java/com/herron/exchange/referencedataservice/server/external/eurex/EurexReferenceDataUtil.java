@@ -1,14 +1,14 @@
 package com.herron.exchange.referencedataservice.server.external.eurex;
 
-import com.herron.exchange.common.api.common.api.referencedata.exchange.BusinessCalendar;
-import com.herron.exchange.common.api.common.api.referencedata.exchange.Market;
-import com.herron.exchange.common.api.common.api.referencedata.exchange.Product;
-import com.herron.exchange.common.api.common.api.referencedata.exchange.TradingCalendar;
 import com.herron.exchange.common.api.common.api.referencedata.instruments.Instrument;
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
-import com.herron.exchange.common.api.common.messages.common.ImmutableDefaultBusinessCalendar;
+import com.herron.exchange.common.api.common.messages.common.BusinessCalendar;
+import com.herron.exchange.common.api.common.messages.common.ImmutableBusinessCalendar;
+import com.herron.exchange.common.api.common.messages.pricing.ImmutableBasicFuturePriceModelParameters;
+import com.herron.exchange.common.api.common.messages.pricing.ImmutableBlackScholesPriceModelParameters;
 import com.herron.exchange.common.api.common.messages.refdata.*;
-import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultTradingCalendar;
+import com.herron.exchange.common.api.common.messages.trading.ImmutableTradingCalendar;
+import com.herron.exchange.common.api.common.messages.trading.TradingCalendar;
 import com.herron.exchange.integrations.eurex.model.EurexContractData;
 import com.herron.exchange.integrations.eurex.model.EurexHolidayData;
 import com.herron.exchange.integrations.eurex.model.EurexProductData;
@@ -38,7 +38,7 @@ public class EurexReferenceDataUtil {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     public static Market mapMarket(EurexHolidayData holidayData) {
-        return ImmutableDefaultMarket.builder()
+        return ImmutableMarket.builder()
                 .marketId(MARKET_ID)
                 .businessCalendar(mapMarketBusinessCalendar(holidayData))
                 .build();
@@ -49,7 +49,7 @@ public class EurexReferenceDataUtil {
                 .flatMap(Collection::stream)
                 .map(holiday -> LocalDate.parse(holiday, DATE_TIME_FORMATTER))
                 .toList();
-        return ImmutableDefaultBusinessCalendar.builder()
+        return ImmutableBusinessCalendar.builder()
                 .calendarId(String.format("%s Business Calendar", MARKET_ID))
                 .holidays(holidays)
                 .build();
@@ -58,7 +58,7 @@ public class EurexReferenceDataUtil {
     public static Product mapProduct(Market market,
                                      EurexProductData.ProductInfo productInfo,
                                      EurexHolidayData holidayData) {
-        return ImmutableDefaultProduct.builder()
+        return ImmutableProduct.builder()
                 .productId(productInfo.productId())
                 .productName(productInfo.name())
                 .market(market)
@@ -75,7 +75,7 @@ public class EurexReferenceDataUtil {
                 )
                 .map(holiday -> LocalDate.parse(holiday, DATE_TIME_FORMATTER))
                 .toList();
-        return ImmutableDefaultBusinessCalendar.builder()
+        return ImmutableBusinessCalendar.builder()
                 .calendarId(String.format("%s Business Calendar", MARKET_ID))
                 .holidays(holidays)
                 .build();
@@ -98,7 +98,7 @@ public class EurexReferenceDataUtil {
     }
 
     public static TradingCalendar mapTradingCalendar(EurexTradingHoursData.TradingHour tradingHour) {
-        var builder = ImmutableDefaultTradingCalendar.builder();
+        var builder = ImmutableTradingCalendar.builder();
         var startContinuousTrading = toLocalTime(tradingHour.startContinuousTrading());
         var endContinuousTrading = toLocalTime(tradingHour.eEndContinuousTrading());
         var endOpenAuction = toLocalTime(tradingHour.endOpeningAuction());

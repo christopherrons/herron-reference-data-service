@@ -19,7 +19,6 @@ import com.herron.exchange.referencedataservice.server.repository.ReferenceDataR
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -51,6 +50,7 @@ public class ReferenceDataServiceConfig {
                 .product(product)
                 .firstTradingDate(LocalDate.MIN)
                 .lastTradingDate(LocalDate.MAX)
+                .priceModelParameters(ImmutableIntangiblePriceModelParameters.builder().build())
                 .build();
     }
 
@@ -106,10 +106,6 @@ public class ReferenceDataServiceConfig {
         return new ExternalReferenceDataHandler(eurexReferenceDataHandler);
     }
 
-    @Bean
-    public KafkaBroadcastHandler kafkaBroadcastHandler(KafkaTemplate<String, Object> kafkaTemplate) {
-        return new KafkaBroadcastHandler(kafkaTemplate);
-    }
 
     @Bean(initMethod = "init")
     public ReferenceDataServiceBootloader referenceDataServiceBootloader(ReferenceDataRepository referenceDataRepository,

@@ -1,14 +1,12 @@
 server:
   port: 8083
 
-spring:
-  kafka:
-    bootstrap-servers: "localhost:9092"
-
 kafka:
-  topic:
-    reference-data:
-      nr-of-partitions: 1
+  bootstrap-servers: "localhost:9092"
+  producer:
+    topic:
+      reference-data:
+        nr-of-partitions: 1
 
 reference-data:
   external:

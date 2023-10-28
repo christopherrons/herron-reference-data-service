@@ -4,6 +4,7 @@ import com.herron.exchange.common.api.common.api.referencedata.instruments.Instr
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
 import com.herron.exchange.common.api.common.messages.common.BusinessCalendar;
 import com.herron.exchange.common.api.common.messages.common.ImmutableBusinessCalendar;
+import com.herron.exchange.common.api.common.messages.common.Timestamp;
 import com.herron.exchange.common.api.common.messages.pricing.ImmutableBasicFuturePriceModelParameters;
 import com.herron.exchange.common.api.common.messages.pricing.ImmutableBlackScholesPriceModelParameters;
 import com.herron.exchange.common.api.common.messages.refdata.*;
@@ -138,9 +139,9 @@ public class EurexReferenceDataUtil {
                 .product(product)
                 .currency(productInfo.currency())
                 .underlyingInstrumentId(productInfo.underlyingIsin())
-                .firstTradingDate(LocalDate.parse(contract.firstTradingDate(), DATE_TIME_FORMATTER))
-                .lastTradingDate(LocalDate.parse(contract.lastTradingDate(), DATE_TIME_FORMATTER))
-                .maturityDate(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER))
+                .firstTradingDate(Timestamp.from(LocalDate.parse(contract.firstTradingDate(), DATE_TIME_FORMATTER)))
+                .lastTradingDate(Timestamp.from(LocalDate.parse(contract.lastTradingDate(), DATE_TIME_FORMATTER)))
+                .maturityDate(Timestamp.from(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER)))
                 .settlementType(contract.isPhysical() ? PHYSICAL : CASH)
                 .priceModelParameters(ImmutableBasicFuturePriceModelParameters.builder().build())
                 .build();
@@ -155,9 +156,9 @@ public class EurexReferenceDataUtil {
                 .product(product)
                 .currency(productInfo.currency())
                 .underlyingInstrumentId(productInfo.underlyingIsin())
-                .firstTradingDate(LocalDate.parse(contract.firstTradingDate(), DATE_TIME_FORMATTER))
-                .lastTradingDate(LocalDate.parse(contract.lastTradingDate(), DATE_TIME_FORMATTER))
-                .maturityDate(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER))
+                .firstTradingDate(Timestamp.from(LocalDate.parse(contract.firstTradingDate(), DATE_TIME_FORMATTER)))
+                .lastTradingDate(Timestamp.from(LocalDate.parse(contract.lastTradingDate(), DATE_TIME_FORMATTER)))
+                .maturityDate(Timestamp.from(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER)))
                 .settlementType(contract.isPhysical() ? PHYSICAL : CASH)
                 .strikePrice(Double.parseDouble(contract.strike()))
                 .optionType(contract.isCall() ? CALL : PUT)

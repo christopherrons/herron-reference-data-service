@@ -8,6 +8,7 @@ import com.herron.exchange.common.api.common.enums.AuctionAlgorithmEnum;
 import com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum;
 import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
 import com.herron.exchange.common.api.common.messages.common.BusinessCalendar;
+import com.herron.exchange.common.api.common.messages.common.Timestamp;
 import com.herron.exchange.common.api.common.messages.refdata.*;
 import com.herron.exchange.common.api.common.messages.trading.TradingCalendar;
 import com.herron.exchange.integrations.eurex.EurexReferenceDataApiClient;
@@ -48,8 +49,8 @@ public class ReferenceDataServiceConfig {
         return ImmutableDefaultEquityInstrument.builder()
                 .instrumentId(String.format("%s_btcusd", product.productId()))
                 .product(product)
-                .firstTradingDate(LocalDate.MIN)
-                .lastTradingDate(LocalDate.MAX)
+                .firstTradingDate(Timestamp.from(LocalDate.MIN))
+                .lastTradingDate(Timestamp.from(LocalDate.MAX))
                 .priceModelParameters(ImmutableIntangiblePriceModelParameters.builder().build())
                 .build();
     }

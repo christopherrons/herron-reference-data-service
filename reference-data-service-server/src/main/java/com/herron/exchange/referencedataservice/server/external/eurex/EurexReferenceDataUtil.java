@@ -14,7 +14,7 @@ import com.herron.exchange.integrations.eurex.model.EurexContractData;
 import com.herron.exchange.integrations.eurex.model.EurexHolidayData;
 import com.herron.exchange.integrations.eurex.model.EurexProductData;
 import com.herron.exchange.integrations.eurex.model.EurexTradingHoursData;
-import org.apache.commons.lang3.StringUtils;
+import io.micrometer.common.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

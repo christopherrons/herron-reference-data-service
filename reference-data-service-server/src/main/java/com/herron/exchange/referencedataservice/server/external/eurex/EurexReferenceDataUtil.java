@@ -21,6 +21,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.herron.exchange.common.api.common.enums.AuctionAlgorithmEnum.DUTCH;
@@ -32,6 +33,8 @@ import static com.herron.exchange.common.api.common.enums.OptionTypeEnum.CALL;
 import static com.herron.exchange.common.api.common.enums.OptionTypeEnum.PUT;
 import static com.herron.exchange.common.api.common.enums.SettlementTypeEnum.CASH;
 import static com.herron.exchange.common.api.common.enums.SettlementTypeEnum.PHYSICAL;
+import static java.time.DayOfWeek.SATURDAY;
+import static java.time.DayOfWeek.SUNDAY;
 
 public class EurexReferenceDataUtil {
     private static final String MARKET_ID = "EUREX";
@@ -53,6 +56,7 @@ public class EurexReferenceDataUtil {
         return ImmutableBusinessCalendar.builder()
                 .calendarId(String.format("%s Business Calendar", MARKET_ID))
                 .holidays(holidays)
+                .weekends(Set.of(SATURDAY, SUNDAY))
                 .build();
     }
 
@@ -78,6 +82,7 @@ public class EurexReferenceDataUtil {
                 .toList();
         return ImmutableBusinessCalendar.builder()
                 .calendarId(String.format("%s Business Calendar", MARKET_ID))
+                .weekends(Set.of(SATURDAY, SUNDAY))
                 .holidays(holidays)
                 .build();
     }

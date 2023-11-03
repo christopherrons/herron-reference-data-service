@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,7 @@ public class EurexReferenceDataHandler {
         EurexTradingHoursData eurexTradingHoursData = client.fetchTradingHourData();
         EurexHolidayData eurexHolidayData = client.fetchHolidayData();
         List<EurexContractData> eurexContractDataList = client.fetchContractData(eurexProductData);
+
         if (isMissingData(eurexProductData, eurexTradingHoursData, eurexHolidayData, eurexContractDataList)) {
             return ReferenceDataResult.emptyResult();
         }

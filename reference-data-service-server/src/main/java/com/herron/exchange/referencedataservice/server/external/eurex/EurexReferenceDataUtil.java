@@ -4,6 +4,7 @@ import com.herron.exchange.common.api.common.api.referencedata.instruments.Instr
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
 import com.herron.exchange.common.api.common.messages.common.BusinessCalendar;
 import com.herron.exchange.common.api.common.messages.common.ImmutableBusinessCalendar;
+import com.herron.exchange.common.api.common.messages.common.PureNumber;
 import com.herron.exchange.common.api.common.messages.common.Timestamp;
 import com.herron.exchange.common.api.common.messages.pricing.ImmutableBasicFuturePriceModelParameters;
 import com.herron.exchange.common.api.common.messages.pricing.ImmutableBlackScholesPriceModelParameters;
@@ -165,7 +166,7 @@ public class EurexReferenceDataUtil {
                 .lastTradingDate(Timestamp.from(LocalDate.parse(contract.lastTradingDate(), DATE_TIME_FORMATTER)))
                 .maturityDate(Timestamp.from(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER)))
                 .settlementType(contract.isPhysical() ? PHYSICAL : CASH)
-                .strikePrice(Double.parseDouble(contract.strike()))
+                .strikePrice(PureNumber.create(Double.parseDouble(contract.strike())))
                 .optionType(contract.isCall() ? CALL : PUT)
                 .optionExerciseStyle(contract.isAmerican() ? AMERICAN : EUROPEAN)
                 .priceModelParameters(ImmutableBlackScholesPriceModelParameters.builder().build())

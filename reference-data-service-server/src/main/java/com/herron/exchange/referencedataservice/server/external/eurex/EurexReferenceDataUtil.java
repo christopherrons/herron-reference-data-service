@@ -1,6 +1,7 @@
 package com.herron.exchange.referencedataservice.server.external.eurex;
 
 import com.herron.exchange.common.api.common.api.referencedata.instruments.Instrument;
+import com.herron.exchange.common.api.common.api.referencedata.instruments.PriceModelParameters;
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
 import com.herron.exchange.common.api.common.messages.common.BusinessCalendar;
 import com.herron.exchange.common.api.common.messages.common.ImmutableBusinessCalendar;
@@ -30,6 +31,7 @@ import static com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum.
 import static com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum.PRO_RATA;
 import static com.herron.exchange.common.api.common.enums.OptionExerciseTyleEnum.AMERICAN;
 import static com.herron.exchange.common.api.common.enums.OptionExerciseTyleEnum.EUROPEAN;
+import static com.herron.exchange.common.api.common.enums.OptionSubTypeEnum.OOE;
 import static com.herron.exchange.common.api.common.enums.OptionTypeEnum.CALL;
 import static com.herron.exchange.common.api.common.enums.OptionTypeEnum.PUT;
 import static com.herron.exchange.common.api.common.enums.SettlementTypeEnum.CASH;
@@ -38,6 +40,7 @@ import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
 
 public class EurexReferenceDataUtil {
+    private static final String YIELD_CURVE_ID = "Nasdaq Treasury Yield Curve";
     private static final String MARKET_ID = "EUREX";
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -167,9 +170,14 @@ public class EurexReferenceDataUtil {
                 .maturityDate(Timestamp.from(LocalDate.parse(contract.expirationDate(), DATE_TIME_FORMATTER)))
                 .settlementType(contract.isPhysical() ? PHYSICAL : CASH)
                 .strikePrice(PureNumber.create(Double.parseDouble(contract.strike())))
+                .optionSubType(OOE)
                 .optionType(contract.isCall() ? CALL : PUT)
                 .optionExerciseStyle(contract.isAmerican() ? AMERICAN : EUROPEAN)
-                .priceModelParameters(ImmutableBlackScholesPriceModelParameters.builder().build())
+                .priceModelParameters(ImmutableBlackScholesPriceModelParameters.builder().yieldCurveId(YIELD_CURVE_ID).build())
                 .build();
+    }
+
+    private PriceModelParameters getPriceModelParameters(EurexContractData.Contract contract) {
+        return ImmutableBlackScholesPriceModelParameters.builder().build(); //FIXME: Should return different for american and commoditites
     }
 }

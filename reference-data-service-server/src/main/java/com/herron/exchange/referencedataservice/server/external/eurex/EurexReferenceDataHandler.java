@@ -42,7 +42,6 @@ public class EurexReferenceDataHandler {
             return ReferenceDataResult.emptyResult();
         }
 
-
         var market = EurexReferenceDataUtil.mapMarket(eurexHolidayData);
         var products = eurexProductData.data().productInfos().data().stream()
                 .map(p -> EurexReferenceDataUtil.mapProduct(market, p, eurexHolidayData))

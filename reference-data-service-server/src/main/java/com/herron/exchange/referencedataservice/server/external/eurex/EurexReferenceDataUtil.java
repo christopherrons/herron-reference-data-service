@@ -156,6 +156,48 @@ public class EurexReferenceDataUtil {
                 .build();
     }
 
+    public static Market mockEquityMarket() {
+        return ImmutableMarket.builder()
+                .marketId("Equity Mock")
+                .businessCalendar(BusinessCalendar.defaultWeekendCalendar())
+                .build();
+    }
+
+    public static Product mockEquityProduct(Market market,
+                                     EurexProductData.ProductInfo productInfo) {
+        return ImmutableProduct.builder()
+                .market(market)
+                .productId(productInfo.underlyingIsin())
+                .currency(productInfo.currency())
+                .build();
+    }
+
+    public static Instrument mockEquity(EurexProductData.ProductInfo productInfo,
+                                        Product product) {
+        return ImmutableDefaultEquityInstrument.builder()
+                .contractSize(productInfo.contractSize())
+                .instrumentId(productInfo.underlyingIsin())
+                .product(product)
+                .currency(productInfo.currency())
+                .firstTradingDate(Timestamp.from(LocalDate.MIN))
+                .lastTradingDate(Timestamp.from(LocalDate.MAX))
+                .priceModelParameters(ImmutableIntangiblePriceModelParameters.builder().build())
+                .build();
+    }
+
+    public static OrderbookData mockOrderbookData(Instrument instrument) {
+        return ImmutableDefaultOrderbookData.builder()
+                .orderbookId(instrument.instrumentId())
+                .instrument(instrument)
+                .tradingCurrency(instrument.currency())
+                .auctionAlgorithm(DUTCH)
+                .tickSize(1)
+                .tickValue(1)
+                .matchingAlgorithm(instrument.currency().equals("EUR") ? FIFO : PRO_RATA)
+                .tradingCalendar(TradingCalendar.nineToFiveTradingCalendar())
+                .build();
+    }
+
     public static Instrument mapOption(EurexContractData.Contract contract,
                                        EurexProductData.ProductInfo productInfo,
                                        Product product) {

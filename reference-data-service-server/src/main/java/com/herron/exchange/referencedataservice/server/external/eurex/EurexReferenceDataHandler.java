@@ -2,6 +2,7 @@ package com.herron.exchange.referencedataservice.server.external.eurex;
 
 import com.herron.exchange.common.api.common.api.referencedata.instruments.Instrument;
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
+import com.herron.exchange.common.api.common.messages.refdata.Market;
 import com.herron.exchange.common.api.common.messages.refdata.Product;
 import com.herron.exchange.integrations.eurex.EurexReferenceDataApiClient;
 import com.herron.exchange.integrations.eurex.model.EurexContractData;
@@ -15,11 +16,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataUtil.mapFuture;
-import static com.herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataUtil.mapOption;
+import static com.herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataUtil.*;
 
 public class EurexReferenceDataHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(EurexReferenceDataHandler.class);
@@ -41,6 +42,7 @@ public class EurexReferenceDataHandler {
             return ReferenceDataResult.emptyResult();
         }
 
+
         var market = EurexReferenceDataUtil.mapMarket(eurexHolidayData);
         var products = eurexProductData.data().productInfos().data().stream()
                 .map(p -> EurexReferenceDataUtil.mapProduct(market, p, eurexHolidayData))
@@ -49,13 +51,18 @@ public class EurexReferenceDataHandler {
                 .collect(Collectors.toMap(Instrument::instrumentId, Function.identity()));
         var orderbookData = mapOrderbookData(eurexContractDataList, eurexProductData, instruments, eurexTradingHoursData);
 
-        LOGGER.info("Done fetching Eurex reference data.");
-        return new ReferenceDataResult(
+        ReferenceDataResult referenceData = new ReferenceDataResult(
                 List.of(market),
                 new ArrayList<>(products.values()),
                 new ArrayList<>(instruments.values()),
                 orderbookData
         );
+
+        //Underlying contracts are not available at eurex
+        ReferenceDataResult mockUnderlyingReference = mapMockUnderlyingEquities(eurexProductData, eurexContractDataList);
+
+        LOGGER.info("Done fetching Eurex reference data.");
+        return ReferenceDataResult.concat(referenceData, mockUnderlyingReference);
     }
 
     private boolean isMissingData(EurexProductData eurexProductData,
@@ -82,6 +89,35 @@ public class EurexReferenceDataHandler {
             return true;
         }
         return false;
+    }
+
+    private ReferenceDataResult mapMockUnderlyingEquities(EurexProductData eurexProductData,
+                                                          List<EurexContractData> eurexContractDataList) {
+        Map<String, EurexProductData.ProductInfo> productToInfo = eurexProductData.data().productInfos().data().stream()
+                .collect(Collectors.toMap(EurexProductData.ProductInfo::product, Function.identity(), (current, other) -> current));
+        Set<EurexProductData.ProductInfo> productInfos = eurexContractDataList.stream()
+                .flatMap(k -> k.data().contracts().data().stream())
+                .filter(c -> productToInfo.containsKey(c.product()))
+                .map(c -> productToInfo.get(c.product()))
+                .collect(Collectors.toSet());
+
+        Market market = mockEquityMarket();
+        Map<String, Product> products = productInfos.stream()
+                .map(p -> mockEquityProduct(market, p))
+                .collect(Collectors.toMap(Product::productId, Function.identity(), (current, now) -> current));
+        Set<Instrument> instruments = productInfos.stream()
+                .map(p -> mockEquity(p, products.get(p.underlyingIsin())))
+                .collect(Collectors.toSet());
+        List<OrderbookData> orderbookData = instruments.stream()
+                .map(EurexReferenceDataUtil::mockOrderbookData)
+                .toList();
+
+        return new ReferenceDataResult(
+                List.of(market),
+                new ArrayList<>(products.values()),
+                new ArrayList<>(instruments),
+                orderbookData
+        );
     }
 
     private List<Instrument> mapInstruments(List<EurexContractData> eurexContractDataList,

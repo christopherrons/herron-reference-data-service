@@ -12,7 +12,7 @@ dependencyResolutionManagement {
             library("common.api", "com.herron.exchange:common-api:1.0.290")
             library("common", "com.herron.exchange:common:1.0.290")
             library("integration", "com.herron.exchange:integration:1.0.20")
-            library("integrations", "com.herron.exchange:integrations:1.0.31")
+            library("integrations", "com.herron.exchange:integrations:1.0.33")
         }
 
         create("testlibs") {

@@ -11,7 +11,7 @@ dependencyResolutionManagement {
             library("commons.math", "org.apache.commons:commons-math3:3.2")
             library("common.api", "com.herron.exchange:common-api:1.0.0-SNAPSHOT")
             library("common", "com.herron.exchange:common:1.0.0-SNAPSHOT")
-            library("integration", "com.herron.exchange:integration-api:1.0.0-SNAPSHOT")
+            library("integration.api", "com.herron.exchange:integration-api:1.0.0-SNAPSHOT")
             library("integrations", "com.herron.exchange:integrations:1.0.0-SNAPSHOT")
         }
 

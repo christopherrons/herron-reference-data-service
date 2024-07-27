@@ -31,7 +31,7 @@ public class ReferenceDataServiceConfig {
     public Market mockBitstampMarket() {
         return ImmutableMarket.builder()
                 .marketId("bitstamp")
-                .businessCalendar(BusinessCalendar.defaultWeekendCalendar())
+                .businessCalendar(BusinessCalendar.noHolidayCalendar())
                 .build();
     }
 

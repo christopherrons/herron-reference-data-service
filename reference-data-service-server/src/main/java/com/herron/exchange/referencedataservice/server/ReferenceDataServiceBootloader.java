@@ -32,7 +32,7 @@ public class ReferenceDataServiceBootloader extends Bootloader {
     private void initReferenceDataBroadcasting() {
         logger.info("Init reference data loading");
         broadcastFromRepository();
-      //  broadCastExternalReferenceData();
+        broadCastExternalReferenceData();
         kafkaBroadcastHandler.endBroadCast(REFERENCE_DATA_PARTITION_KEY);
         logger.info("Done reference data loading");
     }

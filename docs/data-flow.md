@@ -10,20 +10,27 @@ This document describes the data flow of the application.
 
 ```mermaid
 flowchart LR;
-BSC{Server Starts} --->INT
 
-
-subgraph INT[INTERNAL]
-IL[Load Mock Data from Repository]
+subgraph INTERNAL_REFERENCE_DATA_REPOSITORY[INTERNAL]
+LOAD_INTERNAL_MOCK_DATA[Load Mock Data from Repository]
 end
 
 
-subgraph EXT[EXTERNAL]
-EU[Fetch Eurex Referens Data]
+subgraph EXTERNAL_REFERENCE_DATA[EXTERNAL]
+FETCH_EUREX_REFERENCE_DATA[Fetch Eurex Referens Data]
 end
 
-INT -->|KAFKA|KP
-INT --> |TRIGGER| EXT
-EXT -->|KAFKA|KP
-subgraph KP[Broadcast Reference Data]
+INTERNAL_REFERENCE_DATA_REPOSITORY -->KAFKA_REFERENCE_DATA_TOPIC
+INTERNAL_REFERENCE_DATA_REPOSITORY --> FETCH_EUREX_REFERENCE_DATA
+FETCH_EUREX_REFERENCE_DATA --> KAFKA_REFERENCE_DATA_TOPIC
+
+
+subgraph KAFKA_REFERENCE_DATA_TOPIC[Reference Data]
+KAFKA_REFERENCE_DATA_TOPIC_PARTITION_1[Partition 1] -.- KAFKA_REFERENCE_DATA_TOPIC_PARTITION_N[Partition... N]
 end
+
+KAFKA_REFERENCE_DATA_TOPIC --> KAFKA_PRODUCER
+subgraph KAFKA_PRODUCER[Kafka Producer]
+KAFKA_PRODUCER_PARTITION_1[Partition 1] -.- KAFKA_PRODUCER_PARTITION_N[Partition... N]
+end
+```

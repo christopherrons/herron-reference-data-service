@@ -164,7 +164,7 @@ public class EurexReferenceDataUtil {
     }
 
     public static Product mockEquityProduct(Market market,
-                                     EurexProductData.ProductInfo productInfo) {
+                                            EurexProductData.ProductInfo productInfo) {
         return ImmutableProduct.builder()
                 .market(market)
                 .productId(productInfo.underlyingIsin())

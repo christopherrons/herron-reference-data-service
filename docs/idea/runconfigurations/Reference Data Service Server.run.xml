@@ -1,10 +1,13 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Reference Data Service Server" type="Application" factoryName="Application" singleton="true">
-    <option name="MAIN_CLASS_NAME" value="com.herron.exchange.referencedataservice.server.ReferenceDataServiceApplication" />
-    <module name="reference-data-service.reference-data-service-server.main" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/herron-reference-data-service/reference-data-service-deploy" />
-    <method v="2">
-      <option name="Make" enabled="true" />
-    </method>
-  </configuration>
+    <configuration default="false" name="Reference Data Service Server" type="Application" factoryName="Application"
+                   singleton="true">
+        <option name="MAIN_CLASS_NAME"
+                value="com.herron.exchange.referencedataservice.server.ReferenceDataServiceApplication"/>
+        <module name="reference-data-service.reference-data-service-server.main"/>
+        <option name="WORKING_DIRECTORY"
+                value="$PROJECT_DIR$/herron-reference-data-service/reference-data-service-deploy"/>
+        <method v="2">
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
 </component>

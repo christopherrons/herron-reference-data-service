@@ -17,6 +17,7 @@ import com.herron.exchange.referencedataservice.server.ReferenceDataServiceBootl
 import com.herron.exchange.referencedataservice.server.external.ExternalReferenceDataHandler;
 import com.herron.exchange.referencedataservice.server.external.eurex.EurexReferenceDataHandler;
 import com.herron.exchange.referencedataservice.server.repository.ReferenceDataRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,19 +37,33 @@ public class ReferenceDataServiceConfig {
     }
 
     @Bean
-    public Product mockBitstampProduct(Market market) {
+    public Product mockBitstampProduct(Market mockBitstampMarket) {
         return ImmutableProduct.builder()
-                .market(market)
-                .productId(String.format("%s_equity", market.marketId()))
-                .currency("usd")
+                .market(mockBitstampMarket)
+                .productId(String.format("%s_equity", mockBitstampMarket.marketId()))
                 .build();
     }
 
     @Bean
-    public Instrument mockBTCUSDInstrument(Product product) {
-        return ImmutableDefaultEquityInstrument.builder()
-                .instrumentId(String.format("%s_btcusd", product.productId()))
-                .product(product)
+    public Instrument mockBTCUSDInstrument(Product mockBitstampProduct) {
+        return ImmutableCryptoEquityInstrument.builder()
+                .instrumentId(String.format("%s_btcusd", mockBitstampProduct.productId()))
+                .product(mockBitstampProduct)
+                .firstTradingDate(Timestamp.from(LocalDate.MIN))
+                .lastTradingDate(Timestamp.from(LocalDate.MAX))
+                .priceModelParameters(ImmutableIntangiblePriceModelParameters.builder().build())
+                .currency("usd")
+                .token("btc")
+                .build();
+    }
+
+    @Bean
+    public Instrument mockBTCEURInstrument(Product mockBitstampProduct) {
+        return ImmutableCryptoEquityInstrument.builder()
+                .instrumentId(String.format("%s_btceur", mockBitstampProduct.productId()))
+                .product(mockBitstampProduct)
+                .currency("eur")
+                .token("btc")
                 .firstTradingDate(Timestamp.from(LocalDate.MIN))
                 .lastTradingDate(Timestamp.from(LocalDate.MAX))
                 .priceModelParameters(ImmutableIntangiblePriceModelParameters.builder().build())
@@ -56,12 +71,53 @@ public class ReferenceDataServiceConfig {
     }
 
     @Bean
-    public OrderbookData mockBTCUSD(Instrument instrument) {
+    public Instrument mockBTCGBPInstrument(Product mockBitstampProduct) {
+        return ImmutableCryptoEquityInstrument.builder()
+                .instrumentId(String.format("%s_btcgbp", mockBitstampProduct.productId()))
+                .product(mockBitstampProduct)
+                .currency("gbp")
+                .token("btc")
+                .firstTradingDate(Timestamp.from(LocalDate.MIN))
+                .lastTradingDate(Timestamp.from(LocalDate.MAX))
+                .priceModelParameters(ImmutableIntangiblePriceModelParameters.builder().build())
+                .build();
+    }
+
+    @Bean
+    public OrderbookData mockBTCEUROrderbookData(@Qualifier("mockBTCEURInstrument") Instrument mockBTCEURInstrument) {
         return ImmutableDefaultOrderbookData.builder()
-                .instrument(instrument)
-                .orderbookId(instrument.instrumentId())
+                .instrument(mockBTCEURInstrument)
+                .orderbookId(mockBTCEURInstrument.instrumentId())
                 .matchingAlgorithm(MatchingAlgorithmEnum.FIFO)
-                .tradingCurrency(instrument.currency())
+                .tradingCurrency(mockBTCEURInstrument.currency())
+                .auctionAlgorithm(AuctionAlgorithmEnum.DUTCH)
+                .tradingCalendar(TradingCalendar.twentyFourSevenTradingCalendar())
+                .tickValue(1)
+                .tickSize(1)
+                .build();
+    }
+
+    @Bean
+    public OrderbookData mockBTCGBPOrderbookData(@Qualifier("mockBTCGBPInstrument") Instrument mockBTCGBPInstrument) {
+        return ImmutableDefaultOrderbookData.builder()
+                .instrument(mockBTCGBPInstrument)
+                .orderbookId(mockBTCGBPInstrument.instrumentId())
+                .matchingAlgorithm(MatchingAlgorithmEnum.FIFO)
+                .tradingCurrency(mockBTCGBPInstrument.currency())
+                .auctionAlgorithm(AuctionAlgorithmEnum.DUTCH)
+                .tradingCalendar(TradingCalendar.twentyFourSevenTradingCalendar())
+                .tickValue(1)
+                .tickSize(1)
+                .build();
+    }
+
+    @Bean
+    public OrderbookData mockBTCUSDOrderbookData(@Qualifier("mockBTCUSDInstrument") Instrument mockBTCUSDInstrument) {
+        return ImmutableDefaultOrderbookData.builder()
+                .instrument(mockBTCUSDInstrument)
+                .orderbookId(mockBTCUSDInstrument.instrumentId())
+                .matchingAlgorithm(MatchingAlgorithmEnum.FIFO)
+                .tradingCurrency(mockBTCUSDInstrument.currency())
                 .auctionAlgorithm(AuctionAlgorithmEnum.DUTCH)
                 .tradingCalendar(TradingCalendar.twentyFourSevenTradingCalendar())
                 .tickValue(1)
@@ -71,10 +127,12 @@ public class ReferenceDataServiceConfig {
 
     @Bean
     public ReferenceDataCache referenceDataCache(List<Market> markets,
+                                                 List<Product> products,
                                                  List<Instrument> instruments,
                                                  List<OrderbookData> orderbookData) {
         var cache = ReferenceDataCache.getCache();
         markets.forEach(cache::addMarket);
+        products.forEach(cache::addProduct);
         instruments.forEach(cache::addInstrument);
         orderbookData.forEach(cache::addOrderbookData);
         return cache;
